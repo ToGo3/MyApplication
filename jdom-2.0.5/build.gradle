@@ -1,0 +1,6 @@
+configurations.create("default")
+artifacts.add("default", file('jdom-2.0.5.jar'))
+dependencies {
+    apply plugin: 'java'
+    compile files('jdom-2.0.5.jar')
+}

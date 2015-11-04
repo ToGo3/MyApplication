@@ -1,17 +1,15 @@
 package com.example.togo.myapplication;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.InputFilter;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.concurrent.ExecutionException;
-
-import wrapper.SmartSpaceException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText editText;
     public static String ip;
     private SmartM3 smartM3;
+    private static ProgressBar progressBar;
 
     InputFilter[] filters = new InputFilter[1];
 
@@ -31,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
         textView=(TextView)findViewById(R.id.textView);
         editText=(EditText)findViewById(R.id.ip_address);
         smartM3 = new SmartM3();
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar.setVisibility(ProgressBar.INVISIBLE);
 
         filters[0] = new InputFilter() {
             @Override
@@ -103,5 +104,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void exit(View view) {
         finish();
+    }
+
+    public static void setProgressBarVisible() {
+        if (progressBar.getVisibility() == ProgressBar.VISIBLE)
+            progressBar.setVisibility(ProgressBar.INVISIBLE);
+        else
+            progressBar.setVisibility(ProgressBar.VISIBLE);
     }
 }

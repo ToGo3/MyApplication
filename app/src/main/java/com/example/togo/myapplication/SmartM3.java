@@ -15,8 +15,8 @@ import wrapper.SmartSpaceTriplet;
  * Created by ToGo on 29.10.2015.
  */
 public class SmartM3 extends AsyncTask<Vector<SmartSpaceTriplet>, Void, Boolean> {
-    private SmartSpaceKPI smartSpaceKPI;
     private static KPICore core;
+    private SmartSpaceKPI smartSpaceKPI;
     private SIBResponse joinResult;
     //private String ip;
 
@@ -48,7 +48,7 @@ public class SmartM3 extends AsyncTask<Vector<SmartSpaceTriplet>, Void, Boolean>
         try {
             smartSpaceKPI=new SmartSpaceKPI(MainActivity.ip,10010,"x");
             Log.d("Smart Space KP ", " correct join to " + MainActivity.ip);
-            if (params[0]!=null) {
+            if (params != null) {
                 for (int i=0; i < params[0].size(); i++) {
                     smartSpaceKPI.insert(params[0].elementAt(i));
                 }
@@ -56,8 +56,8 @@ public class SmartM3 extends AsyncTask<Vector<SmartSpaceTriplet>, Void, Boolean>
             return true;
             //
         } catch (SmartSpaceException e) {
-            e.printStackTrace();
             return false;
+            //e.printStackTrace();
         }
         finally {
             if (smartSpaceKPI!=null)
@@ -91,7 +91,9 @@ public class SmartM3 extends AsyncTask<Vector<SmartSpaceTriplet>, Void, Boolean>
 
     protected void onPreExecute() {
         super.onPreExecute();
-        Log.d("SmartM3","BeginToConnect");
+        Log.d("SmartM3", "BeginToConnect");
+
+        //MainActivity.setProgressBarVisible();
     }
 
     @Override
@@ -101,6 +103,7 @@ public class SmartM3 extends AsyncTask<Vector<SmartSpaceTriplet>, Void, Boolean>
         //this.leaveSmart();
 
         Log.d("SmarM3", "Disconnect");
+        //MainActivity.setProgressBarVisible();
     }
 
 

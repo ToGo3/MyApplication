@@ -13,15 +13,19 @@ import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView textView;
-    private int i=0;
-    private EditText editText;
     public static String ip;
-    private SmartM3 smartM3;
     private static ProgressBar progressBar;
-
     InputFilter[] filters = new InputFilter[1];
+    private TextView textView;
+    private EditText editText;
+    private SmartM3 smartM3;
 
+    public static void setProgressBarVisible() {
+        if (progressBar.getVisibility() == ProgressBar.VISIBLE)
+            progressBar.setVisibility(ProgressBar.INVISIBLE);
+        else
+            progressBar.setVisibility(ProgressBar.VISIBLE);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,9 +33,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         textView=(TextView)findViewById(R.id.textView);
         editText=(EditText)findViewById(R.id.ip_address);
-        smartM3 = new SmartM3();
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        progressBar.setVisibility(ProgressBar.INVISIBLE);
+        progressBar.setVisibility(ProgressBar.VISIBLE);
 
         filters[0] = new InputFilter() {
             @Override
@@ -58,19 +61,12 @@ public class MainActivity extends AppCompatActivity {
             }
 
         };
-
-
         editText.setFilters(filters);
     }
 
-
-
-
-
     public void onClick(View view) {
-       // i++;
-        if(editText.length()!=0) {
-            ip=editText.getText().toString();
+        if (IPAddressValidator.validate(editText.getText().toString())) {
+            smartM3 = new SmartM3();
             smartM3.execute();
             try {
                 if(smartM3.get()){
@@ -78,14 +74,15 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
                 else {
-                    editText.setText("Error with connection");
+                    textView.setText("Error with connection");
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
-        }
+        } else
+            textView.setText("IP address is incorrect");
         /*textView.setText(editText.getText());
         try {
             smartM3=new SmartM3(editText.getText().toString());
@@ -104,12 +101,5 @@ public class MainActivity extends AppCompatActivity {
 
     public void exit(View view) {
         finish();
-    }
-
-    public static void setProgressBarVisible() {
-        if (progressBar.getVisibility() == ProgressBar.VISIBLE)
-            progressBar.setVisibility(ProgressBar.INVISIBLE);
-        else
-            progressBar.setVisibility(ProgressBar.VISIBLE);
     }
 }

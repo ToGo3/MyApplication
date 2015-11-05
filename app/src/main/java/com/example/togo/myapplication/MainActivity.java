@@ -1,12 +1,12 @@
 package com.example.togo.myapplication;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputFilter;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.concurrent.ExecutionException;
@@ -14,18 +14,14 @@ import java.util.concurrent.ExecutionException;
 public class MainActivity extends AppCompatActivity {
 
     public static String ip;
-    private static ProgressBar progressBar;
     InputFilter[] filters = new InputFilter[1];
     private TextView textView;
     private EditText editText;
     private SmartM3 smartM3;
+    private ProgressDialog progressDialog;
 
-    public static void setProgressBarVisible() {
-        if (progressBar.getVisibility() == ProgressBar.VISIBLE)
-            progressBar.setVisibility(ProgressBar.INVISIBLE);
-        else
-            progressBar.setVisibility(ProgressBar.VISIBLE);
-    }
+    //TODO popup message; test wordinsert; options activity; test pogressdialog and etc.
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +29,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         textView=(TextView)findViewById(R.id.textView);
         editText=(EditText)findViewById(R.id.ip_address);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        progressBar.setVisibility(ProgressBar.VISIBLE);
 
         filters[0] = new InputFilter() {
             @Override
@@ -67,13 +61,18 @@ public class MainActivity extends AppCompatActivity {
     public void onClick(View view) {
         if (IPAddressValidator.validate(editText.getText().toString())) {
             smartM3 = new SmartM3();
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage("Connecting...");
+            progressDialog.show();
             smartM3.execute();
             try {
                 if(smartM3.get()){
+                    progressDialog.dismiss();
                     Intent intent = new Intent(MainActivity.this, WordActivity.class);
                     startActivity(intent);
                 }
                 else {
+                    progressDialog.dismiss();
                     textView.setText("Error with connection");
                 }
             } catch (InterruptedException e) {
@@ -81,8 +80,9 @@ public class MainActivity extends AppCompatActivity {
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
-        } else
+        } else {
             textView.setText("IP address is incorrect");
+        }
         /*textView.setText(editText.getText());
         try {
             smartM3=new SmartM3(editText.getText().toString());
@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
             smartM3.leaveSmart();
         }*/
     }
+
 
     public void setTextView(String s){
         textView.setText(s);

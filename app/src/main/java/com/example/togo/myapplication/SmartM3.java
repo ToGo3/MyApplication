@@ -5,8 +5,6 @@ import android.util.Log;
 
 import java.util.Vector;
 
-import sofia_kp.KPICore;
-import sofia_kp.SIBResponse;
 import wrapper.SmartSpaceException;
 import wrapper.SmartSpaceKPI;
 import wrapper.SmartSpaceTriplet;
@@ -15,31 +13,7 @@ import wrapper.SmartSpaceTriplet;
  * Created by ToGo on 29.10.2015.
  */
 public class SmartM3 extends AsyncTask<Vector<SmartSpaceTriplet>, Void, Boolean> {
-    private static KPICore core;
     private SmartSpaceKPI smartSpaceKPI;
-    private SIBResponse joinResult;
-    //private String ip;
-
-    SmartM3(String ip) {
-        //smartSpaceKPI = new SmartSpaceKPI(ip, 10010, "x");
-        /*core=new KPICore(ip,10010,"x");
-        joinResult=core.join();
-        if (joinResult != null) {
-            if (joinResult.isConfirmed()) { // KPI 7.1
-                Log.d("Smart Space KP ", " correct join to " + ip);
-            } else {
-                Log.d("Smart Space KP ", " Problem with join to the " + ip+". Check your connection information");
-            }
-        } else {
-            Log.d("Smart Space KP ", " Problem with join to the " + ip +". Check your connection information");
-        }*/
-        //Log.e("SmartM3", core.insert("Phone", "in", "Smart", "uri", "literal").toString());
-
-    }
-
-    public SmartM3() {
-
-    }
 
 
 
@@ -54,10 +28,8 @@ public class SmartM3 extends AsyncTask<Vector<SmartSpaceTriplet>, Void, Boolean>
                 }
             }
             return true;
-            //
         } catch (SmartSpaceException e) {
             return false;
-            //e.printStackTrace();
         }
         finally {
             if (smartSpaceKPI!=null)
@@ -92,18 +64,12 @@ public class SmartM3 extends AsyncTask<Vector<SmartSpaceTriplet>, Void, Boolean>
     protected void onPreExecute() {
         super.onPreExecute();
         Log.d("SmartM3", "BeginToConnect");
-
-        //MainActivity.setProgressBarVisible();
     }
 
     @Override
     protected void onPostExecute(Boolean result) {
         super.onPostExecute(result);
-
-        //this.leaveSmart();
-
         Log.d("SmarM3", "Disconnect");
-        //MainActivity.setProgressBarVisible();
     }
 
 

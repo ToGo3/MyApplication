@@ -47,18 +47,6 @@
             android:onClick="exit"
             android:text="EXIT" />
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="111dp"
-            android:layout_height="wrap_content"
-            android:layout_alignEnd="@+id/button"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignRight="@+id/button"
-            android:layout_weight="0.18"
-            android:visibility="visible" />
-
     </RelativeLayout>
 
 </LinearLayout>

@@ -1,5 +1,6 @@
 package com.example.togo.myapplication;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -14,7 +15,12 @@ import wrapper.SmartSpaceTriplet;
  */
 public class SmartM3 extends AsyncTask<Vector<SmartSpaceTriplet>, Void, Boolean> {
     private SmartSpaceKPI smartSpaceKPI;
+    private Context activ;
+    // private ProgressDialog progressDialog;
 
+    public SmartM3(Context context) {
+        this.activ = context;
+    }
 
 
     @Override
@@ -22,9 +28,17 @@ public class SmartM3 extends AsyncTask<Vector<SmartSpaceTriplet>, Void, Boolean>
         try {
             smartSpaceKPI=new SmartSpaceKPI(MainActivity.ip,10010,"x");
             Log.d("Smart Space KP ", " correct join to " + MainActivity.ip);
-            if (params != null) {
+            if (params.length != 0) {
                 for (int i=0; i < params[0].size(); i++) {
-                    smartSpaceKPI.insert(params[0].elementAt(i));
+                    try {
+                        Vector<SmartSpaceTriplet> query = smartSpaceKPI.query(new SmartSpaceTriplet(params[0].elementAt(i).getSubject(), params[0].elementAt(i).getPredicate(), null));
+                        if (query.isEmpty())
+                            smartSpaceKPI.insert(params[0].elementAt(i));
+                        else
+                            smartSpaceKPI.update(params[0].elementAt(i), new SmartSpaceTriplet(params[0].elementAt(i).getSubject(), params[0].elementAt(i).getPredicate(), null));
+                    } catch (SmartSpaceException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             return true;
@@ -62,13 +76,19 @@ public class SmartM3 extends AsyncTask<Vector<SmartSpaceTriplet>, Void, Boolean>
     }
 
     protected void onPreExecute() {
-        super.onPreExecute();
+        //super.onPreExecute();
+        /*progressDialog = new ProgressDialog(this.activ);
+        progressDialog.setMessage("Connecting...");
+        progressDialog.show();*/
         Log.d("SmartM3", "BeginToConnect");
     }
 
     @Override
     protected void onPostExecute(Boolean result) {
-        super.onPostExecute(result);
+        //super.onPostExecute(result);
+        /*if (progressDialog.isShowing()){
+            progressDialog.dismiss();
+        }*/
         Log.d("SmarM3", "Disconnect");
     }
 

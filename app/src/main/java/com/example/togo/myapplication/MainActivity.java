@@ -1,13 +1,20 @@
 package com.example.togo.myapplication;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputFilter;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.concurrent.ExecutionException;
 
@@ -29,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         textView=(TextView)findViewById(R.id.textView);
         editText=(EditText)findViewById(R.id.ip_address);
+        progressDialog = new ProgressDialog(MainActivity.this);
 
         filters[0] = new InputFilter() {
             @Override
@@ -56,24 +64,69 @@ public class MainActivity extends AppCompatActivity {
 
         };
         editText.setFilters(filters);
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        // TODO Auto-generated method stub
+        //super.onBackPressed();
+        openQuitDialog();
+    }
+
+    private void openQuitDialog() {
+        AlertDialog.Builder quitDialog = new AlertDialog.Builder(
+                MainActivity.this);
+        quitDialog.setTitle("Выход: Вы уверены?");
+
+        quitDialog.setPositiveButton("Таки да!", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+
+        quitDialog.setNegativeButton("Нет", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        quitDialog.show();
     }
 
     public void onClick(View view) {
         if (IPAddressValidator.validate(editText.getText().toString())) {
-            smartM3 = new SmartM3();
-            progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage("Connecting...");
-            progressDialog.show();
+
+            InputMethodManager imm = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+
+            //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+            ip = editText.getText().toString();
+            //progressDialog = new ProgressDialog(MainActivity.this.getApplicationContext());
+            /*progressDialog.setMessage("Connecting...");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.show();*/
+            PD.ShowDialog(this, "Connection...");
+            Log.d("assssss", "asdsfffffdfsd");
+            try {
+                Thread.sleep(30000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            smartM3 = new SmartM3(this);
             smartM3.execute();
             try {
                 if(smartM3.get()){
-                    progressDialog.dismiss();
                     Intent intent = new Intent(MainActivity.this, WordActivity.class);
                     startActivity(intent);
+                    //progressDialog.dismiss();
                 }
                 else {
-                    progressDialog.dismiss();
-                    textView.setText("Error with connection");
+                    //progressDialog.dismiss();
+                    showToast();
+                    //textView.setText("Error with connection");
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -81,7 +134,8 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         } else {
-            textView.setText("IP address is incorrect");
+            showToast();
+            //textView.setText("IP address is incorrect");
         }
         /*textView.setText(editText.getText());
         try {
@@ -101,6 +155,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void exit(View view) {
-        finish();
+        openQuitDialog();
+    }
+
+    public void showToast() {
+        Toast toast = Toast.makeText(MainActivity.this,
+                "Пора покормить кота!",
+                Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
     }
 }

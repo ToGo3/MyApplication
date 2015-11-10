@@ -5,18 +5,14 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputFilter;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,15 +23,15 @@ public class MainActivity extends AppCompatActivity {
     private SmartM3 smartM3;
     private ProgressDialog progressDialog;
 
-    //TODO popup message; test wordinsert; options activity; test pogressdialog and etc.
+    //TODO options activity; test pogressdialog and etc.
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        textView=(TextView)findViewById(R.id.textView);
-        editText=(EditText)findViewById(R.id.ip_address);
+        textView = (TextView) findViewById(R.id.textView);
+        editText = (EditText) findViewById(R.id.ip_address);
         progressDialog = new ProgressDialog(MainActivity.this);
 
         filters[0] = new InputFilter() {
@@ -69,8 +65,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // TODO Auto-generated method stub
-        //super.onBackPressed();
         openQuitDialog();
     }
 
@@ -99,58 +93,14 @@ public class MainActivity extends AppCompatActivity {
 
             InputMethodManager imm = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
-
-            //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-            //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
             ip = editText.getText().toString();
-            //progressDialog = new ProgressDialog(MainActivity.this.getApplicationContext());
-            /*progressDialog.setMessage("Connecting...");
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDialog.show();*/
-            PD.ShowDialog(this, "Connection...");
-            Log.d("assssss", "asdsfffffdfsd");
-            try {
-                Thread.sleep(30000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            new useSmart().execute();
+        }
 
-            smartM3 = new SmartM3(this);
-            smartM3.execute();
-            try {
-                if(smartM3.get()){
-                    Intent intent = new Intent(MainActivity.this, WordActivity.class);
-                    startActivity(intent);
-                    //progressDialog.dismiss();
-                }
-                else {
-                    //progressDialog.dismiss();
-                    showToast();
-                    //textView.setText("Error with connection");
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        } else {
-            showToast();
-            //textView.setText("IP address is incorrect");
-        }
-        /*textView.setText(editText.getText());
-        try {
-            smartM3=new SmartM3(editText.getText().toString());
-        } catch (SmartSpaceException e) {
-            //e.printStackTrace();
-            //Log.e("SmartM3", e.toString());
-        }
-        finally {
-            smartM3.leaveSmart();
-        }*/
     }
 
 
-    public void setTextView(String s){
+    public void setTextView(String s) {
         textView.setText(s);
     }
 
@@ -158,11 +108,28 @@ public class MainActivity extends AppCompatActivity {
         openQuitDialog();
     }
 
-    public void showToast() {
-        Toast toast = Toast.makeText(MainActivity.this,
-                "Пора покормить кота!",
-                Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0);
-        toast.show();
+
+    class useSmart extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            return SmartM3.insert(null);
+        }
+
+        protected void onPreExecute() {
+            PD.showDialog(MainActivity.this, "Connecting...");
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            PD.hideDialog();
+            if (result) {
+                Intent intent = new Intent(MainActivity.this, WordActivity.class);
+                startActivity(intent);
+            } else {
+                PD.showToast(MainActivity.this, "Error! Check your connecting!");
+            }
+        }
+
     }
 }

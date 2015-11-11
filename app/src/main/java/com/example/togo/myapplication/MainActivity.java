@@ -2,7 +2,6 @@ package com.example.togo.myapplication;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -10,7 +9,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputFilter;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -89,13 +87,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClick(View view) {
-        if (IPAddressValidator.validate(editText.getText().toString())) {
+      /*  if (IPAddressValidator.validate(editText.getText().toString())) {
 
             InputMethodManager imm = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
             ip = editText.getText().toString();
             new useSmart().execute();
-        }
+        }*/
+        Intent intent = new Intent(MainActivity.this, PreferenceActivity.class);
+        startActivity(intent);
 
     }
 

@@ -17,17 +17,21 @@ public class SmartM3 {
         try {
             smartSpaceKPI=new SmartSpaceKPI(MainActivity.ip,10010,"x");
             if (triples != null) {
-                for (int i = 0; i < triples.size(); i++) {
-                    try {
-                        Vector<SmartSpaceTriplet> query = smartSpaceKPI.query(new SmartSpaceTriplet(triples.elementAt(i).getSubject(), triples.elementAt(i).getPredicate(), null));
-                        if (query.isEmpty())
-                            smartSpaceKPI.insert(triples.elementAt(i));
-                        else
-                            smartSpaceKPI.update(triples.elementAt(i), new SmartSpaceTriplet(triples.elementAt(i).getSubject(), triples.elementAt(i).getPredicate(), null));
-                    } catch (SmartSpaceException e) {
-                        e.printStackTrace();
+                if (triples.elementAt(0).getSubject() != null) {
+                    smartSpaceKPI.remove(new SmartSpaceTriplet(null, triples.elementAt(0).getPredicate(), null));
+                    for (int i = 0; i < triples.size(); i++) {
+                        try {
+                            Vector<SmartSpaceTriplet> query = smartSpaceKPI.query(new SmartSpaceTriplet(triples.elementAt(i).getSubject(), triples.elementAt(i).getPredicate(), null));
+                            if (query.isEmpty())
+                                smartSpaceKPI.insert(triples.elementAt(i));
+                            else
+                                smartSpaceKPI.update(triples.elementAt(i), new SmartSpaceTriplet(triples.elementAt(i).getSubject(), triples.elementAt(i).getPredicate(), null));
+                        } catch (SmartSpaceException e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
+                } else
+                    smartSpaceKPI.remove(new SmartSpaceTriplet(null, triples.elementAt(0).getPredicate(), null));
             }
             return true;
         } catch (SmartSpaceException e) {

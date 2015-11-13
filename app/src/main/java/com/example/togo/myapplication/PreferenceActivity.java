@@ -1,9 +1,17 @@
 package com.example.togo.myapplication;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -11,132 +19,185 @@ import android.widget.TextView;
 
 import java.util.Vector;
 
+import wrapper.SmartSpaceTriplet;
+
 public class PreferenceActivity extends AppCompatActivity {
     String[] colors = {"None", "Black", "Blue", "Green", "Red", "White", "Yellow"};
     Vector<TableRow> rows;
     Vector<TextView> textViews;
     Vector<Spinner> spinners;
+    Button accept;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //TODO set scrollable, add buttons && backmessage
+        setContentView(R.layout.activity_preference);
+        //TODO check changes, start with shared preferences
 
-        TableLayout table = new TableLayout(this);
-        /*android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"*/
+        TableLayout table = (TableLayout) findViewById(R.id.tableLayout);
 
         TableRow.LayoutParams params = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.MATCH_PARENT);
         params.setMargins(16, 16, 16, 16);
 
-
         rows = new Vector<TableRow>();
         textViews = new Vector<TextView>();
         spinners = new Vector<Spinner>();
+        char letter = 'A';
+        int i;
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 R.layout.spinner, R.id.colors, colors);
 
         table.setStretchAllColumns(true);
         table.setShrinkAllColumns(true);
 
-        for (int i = 0; i < 26; i++) {
+        for (i = 0; i < 26; i++) {
             rows.add(new TableRow(this));
+            rows.elementAt(i).setLayoutParams(params);
+
+
             textViews.add(new TextView(this));
-            textViews.elementAt(i).setText("A");
-            textViews.elementAt(i).setTextAppearance(this, android.R.style.TextAppearance_Large);
+            textViews.elementAt(i).setText(String.valueOf(letter++));
+            textViews.elementAt(i).setTextAppearance(this, R.style.OverlayText);
             textViews.elementAt(i).setTypeface(null, Typeface.BOLD);
+
+
             spinners.add(new Spinner(this));
             spinners.elementAt(i).setAdapter(adapter);
+            spinners.elementAt(i).setId(i);
+            spinners.elementAt(i).setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    Log.d("Spinner", "" + position + " " + parent.getId());
+                    switchColor(position, parent.getId());
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                }
+            });
+
+
             rows.elementAt(i).addView(textViews.elementAt(i), params);
-            rows.elementAt(i).addView(spinners.elementAt(i), params);
-            table.addView(rows.elementAt(i), params);
+            rows.elementAt(i).addView(spinners.elementAt(i), new TableRow.LayoutParams(143, TableRow.LayoutParams.MATCH_PARENT));
+            table.addView(rows.elementAt(i));
         }
-        setContentView(table, params);
-/*
-        TableRow rowTitle = new TableRow(this);
-        rowTitle.setGravity(Gravity.CENTER_HORIZONTAL);
 
-        TableRow rowDayLabels = new TableRow(this);
-        TableRow rowHighs = new TableRow(this);
-        TableRow rowLows = new TableRow(this);
-        TableRow rowConditions = new TableRow(this);
-        rowConditions.setGravity(Gravity.CENTER);
+        rows.add(new TableRow(this));
+        rows.lastElement().setLayoutParams(params);
 
-        TextView empty = new TextView(this);
+        accept = new Button(this);
+        accept.setText("Accept");
+        accept.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Vector<SmartSpaceTriplet> query = new Vector<SmartSpaceTriplet>();
+                for (int i = 0; i < 26; i++) {
+                    if (spinners.elementAt(i).getSelectedItemPosition() != 0) {
+                        query.add(new SmartSpaceTriplet(textViews.elementAt(i).getText().toString(), "hasColor", spinners.elementAt(i).getSelectedItem().toString()));
+                    }
+                }
+                if (query.size() == 0) {
+                    query.add(new SmartSpaceTriplet(null, "hasColor", null));
+                }
+                new useSmart().execute(query);
+            }
+        });
 
-        // title column/row
-        TextView title = new TextView(this);
-        title.setText("Java Weather Table");
+        Button clear = new Button(this);
+        clear.setText("Clear");
+        clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clear();
+            }
+        });
 
-        title.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-        title.setGravity(Gravity.CENTER);
-        title.setTypeface(Typeface.SERIF, Typeface.BOLD);
+        rows.lastElement().addView(accept, params);
+        rows.lastElement().addView(clear, params);
+        table.addView(rows.lastElement());
+    }
 
-        TableRow.LayoutParams params = new TableRow.LayoutParams();
-        params.span = 6;
+    private void switchColor(int selectedItem, int a) {
+        switch (selectedItem) {
+            case 0:
+                this.textViews.elementAt(a).setTextColor(Color.GRAY);
+                break;
+            case 1:
+                this.textViews.elementAt(a).setTextColor(Color.BLACK);
+                break;
+            case 2:
+                this.textViews.elementAt(a).setTextColor(Color.BLUE);
+                break;                                                                                                //change color of label
+            case 3:
+                this.textViews.elementAt(a).setTextColor(Color.GREEN);
+                break;
+            case 4:
+                this.textViews.elementAt(a).setTextColor(Color.RED);
+                break;
+            case 5:
+                this.textViews.elementAt(a).setTextColor(Color.WHITE);
+                break;
+            case 6:
+                this.textViews.elementAt(a).setTextColor(Color.YELLOW);
+                break;
+        }
+    }
 
-        rowTitle.addView(title, params);
+    public void clear() {
+        for (int i = 0; i < 26; i++) {
+            spinners.elementAt(i).setSelection(0);
+        }
+    }
 
-        // labels column
-        TextView highsLabel = new TextView(this);
-        highsLabel.setText("Day High");
-        highsLabel.setTypeface(Typeface.DEFAULT_BOLD);
+    @Override
+    public void onBackPressed() {
+        openQuitDialog();
+    }
 
-        TextView lowsLabel = new TextView(this);
-        lowsLabel.setText("Day Low");
-        lowsLabel.setTypeface(Typeface.DEFAULT_BOLD);
+    private void openQuitDialog() {
+        AlertDialog.Builder quitDialog = new AlertDialog.Builder(
+                PreferenceActivity.this);
+        quitDialog.setTitle("Вы хотите сохранить изменения?");
 
-        TextView conditionsLabel = new TextView(this);
-        conditionsLabel.setText("Conditions");
-        conditionsLabel.setTypeface(Typeface.DEFAULT_BOLD);
+        quitDialog.setNegativeButton("Таки да!", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                accept.performClick();
+                //finish();
+            }
+        });
 
-        rowDayLabels.addView(empty);
-        rowHighs.addView(highsLabel);
-        rowLows.addView(lowsLabel);
-        rowConditions.addView(conditionsLabel);
+        quitDialog.setPositiveButton("Нет", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+        quitDialog.show();
+    }
 
-        // day 1 column
-        TextView day1Label = new TextView(this);
-        day1Label.setText("Feb 7");
-        day1Label.setTypeface(Typeface.SERIF, Typeface.BOLD);
+    class useSmart extends AsyncTask<Vector<SmartSpaceTriplet>, Void, Boolean> {
 
-        TextView day1High = new TextView(this);
-        day1High.setText("28°F");
-        day1High.setGravity(Gravity.CENTER_HORIZONTAL);
+        @Override
+        protected Boolean doInBackground(Vector<SmartSpaceTriplet>... params) {
+            return SmartM3.insert(params[0]);
+        }
 
-        TextView day1Low = new TextView(this);
-        day1Low.setText("15°F");
-        day1Low.setGravity(Gravity.CENTER_HORIZONTAL);
+        protected void onPreExecute() {
+            PD.showDialog(PreferenceActivity.this, "Inserting...");
+        }
 
-        ImageView day1Conditions = new ImageView(this);
-        day1Conditions.setImageResource(R.drawable.hot);
+        @Override
+        protected void onPostExecute(Boolean result) {
+            PD.hideDialog();
+            if (result) {
+                PD.showToast(PreferenceActivity.this, "Data was correctly inserted");
+                finish();
+            } else {
+                PD.showToast(PreferenceActivity.this, "Error! Check your connecting");
+            }
+        }
 
-        rowDayLabels.addView(day1Label);
-        rowHighs.addView(day1High);
-        rowLows.addView(day1Low);
-        rowConditions.addView(day1Conditions);
-
-
-
-
-
-        super.onCreate(savedInstanceState);
-        TableLayout tableLayout=new TableLayout(this);
-        TableLayout.LayoutParams tabLayoutParam = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT);
-        setContentView(tableLayout,tabLayoutParam);
-
-        TextView textView=new TextView(this);
-        textView.setText("A");
-        textView.setLayoutParams(tabLayoutParam);*/
-
-        /*final Spinner spinner = (Spinner) findViewById(R.id.spinner);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                R.layout.spinner, R.id.colors, colors);
-        spinner.setAdapter(adapter);*/
     }
 }

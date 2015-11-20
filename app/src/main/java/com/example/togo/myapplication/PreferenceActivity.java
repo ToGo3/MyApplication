@@ -2,6 +2,7 @@ package com.example.togo.myapplication;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -27,13 +28,14 @@ public class PreferenceActivity extends AppCompatActivity {
     Vector<TextView> textViews;
     Vector<Spinner> spinners;
     Button accept;
-
+    private SharedPreferences pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preference);
-        //TODO check changes, start with shared preferences
+        pref = getSharedPreferences("letters", MODE_PRIVATE);
+        accept = (Button) findViewById(R.id.button5);
 
         TableLayout table = (TableLayout) findViewById(R.id.tableLayout);
 
@@ -76,46 +78,15 @@ public class PreferenceActivity extends AppCompatActivity {
                 public void onNothingSelected(AdapterView<?> parent) {
                 }
             });
+            if (!pref.getString(textViews.elementAt(i).getText().toString(), "").equals("")) {
+                spinners.elementAt(i).setSelection(adapter.getPosition(pref.getString(textViews.elementAt(i).getText().toString(), "")));
+            }
 
 
             rows.elementAt(i).addView(textViews.elementAt(i), params);
             rows.elementAt(i).addView(spinners.elementAt(i), new TableRow.LayoutParams(143, TableRow.LayoutParams.MATCH_PARENT));
             table.addView(rows.elementAt(i));
         }
-
-        rows.add(new TableRow(this));
-        rows.lastElement().setLayoutParams(params);
-
-        accept = new Button(this);
-        accept.setText("Accept");
-        accept.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Vector<SmartSpaceTriplet> query = new Vector<SmartSpaceTriplet>();
-                for (int i = 0; i < 26; i++) {
-                    if (spinners.elementAt(i).getSelectedItemPosition() != 0) {
-                        query.add(new SmartSpaceTriplet(textViews.elementAt(i).getText().toString(), "hasColor", spinners.elementAt(i).getSelectedItem().toString()));
-                    }
-                }
-                if (query.size() == 0) {
-                    query.add(new SmartSpaceTriplet(null, "hasColor", null));
-                }
-                new useSmart().execute(query);
-            }
-        });
-
-        Button clear = new Button(this);
-        clear.setText("Clear");
-        clear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clear();
-            }
-        });
-
-        rows.lastElement().addView(accept, params);
-        rows.lastElement().addView(clear, params);
-        table.addView(rows.lastElement());
     }
 
     private void switchColor(int selectedItem, int a) {
@@ -144,15 +115,45 @@ public class PreferenceActivity extends AppCompatActivity {
         }
     }
 
-    public void clear() {
+    public void clear(View view) {
         for (int i = 0; i < 26; i++) {
-            spinners.elementAt(i).setSelection(0);
+            this.spinners.elementAt(i).setSelection(0);
         }
+    }
+
+    public void acceptPref(View view) {
+        Vector<SmartSpaceTriplet> query = new Vector<SmartSpaceTriplet>();
+        for (int i = 0; i < 26; i++) {
+            if (spinners.elementAt(i).getSelectedItemPosition() != 0) {
+                query.add(new SmartSpaceTriplet(textViews.elementAt(i).getText().toString(), "hasColor", spinners.elementAt(i).getSelectedItem().toString()));
+            }
+        }
+        if (query.size() == 0) {
+            query.add(new SmartSpaceTriplet(null, "hasColor", null));
+        }
+        new useSmart().execute(query);
+    }
+
+    private boolean isChanged() {
+        for (int i = 0; i < spinners.size(); i++) {
+            String a = "";
+            String b = pref.getString(textViews.elementAt(i).getText().toString(), "");
+            if (!spinners.elementAt(i).getSelectedItem().toString().equals("None")) {
+                a = spinners.elementAt(i).getSelectedItem().toString();
+            }
+            if (!a.equals(b)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public void onBackPressed() {
-        openQuitDialog();
+        if (isChanged())
+            openQuitDialog();
+        else
+            finish();
     }
 
     private void openQuitDialog() {
@@ -164,7 +165,6 @@ public class PreferenceActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 accept.performClick();
-                //finish();
             }
         });
 
@@ -181,7 +181,16 @@ public class PreferenceActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Vector<SmartSpaceTriplet>... params) {
+            SharedPreferences.Editor editPref = pref.edit();
+            editPref.clear();
+            if (params[0].elementAt(0).getSubject() != null) {
+                for (int i = 0; i < params[0].size(); i++) {
+                    editPref.putString(params[0].elementAt(i).getSubject(), params[0].elementAt(i).getObject());
+                }
+            }
+            editPref.commit();
             return SmartM3.insert(params[0]);
+
         }
 
         protected void onPreExecute() {

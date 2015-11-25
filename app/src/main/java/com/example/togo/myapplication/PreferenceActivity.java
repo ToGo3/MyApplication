@@ -189,7 +189,7 @@ public class PreferenceActivity extends AppCompatActivity {
                 }
             }
             editPref.commit();
-            return SmartM3.insert(params[0]);
+            return SmartM3.insert(params[0], PreferenceActivity.this);
 
         }
 

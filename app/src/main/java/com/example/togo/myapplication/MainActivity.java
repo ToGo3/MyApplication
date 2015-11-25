@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            return SmartM3.insert(null);
+            return SmartM3.insert(null, MainActivity.this);
         }
 
         protected void onPreExecute() {

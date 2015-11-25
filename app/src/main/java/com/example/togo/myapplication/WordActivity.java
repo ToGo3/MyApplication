@@ -62,7 +62,7 @@ public class WordActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Vector<SmartSpaceTriplet>... params) {
-            return SmartM3.insert(params[0]);
+            return SmartM3.insert(params[0], WordActivity.this);
         }
 
         protected void onPreExecute() {

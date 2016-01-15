@@ -14,7 +14,11 @@ import android.text.InputFilter;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.util.Deque;
+import java.util.LinkedList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textView;
     private EditText editText;
     private SharedPreferences pref;
+    private Deque<String> deque;
 
 
     @Override
@@ -32,10 +37,25 @@ public class MainActivity extends AppCompatActivity {
         textView = (TextView) findViewById(R.id.textView);
         editText = (EditText) findViewById(R.id.ip_address);
         pref = getSharedPreferences("main", MODE_PRIVATE);
-        ip = pref.getString("last_ip", "");
-        if (!ip.equals("")) {
+
+
+        deque = new LinkedList<String>();
+        setDeque();
+
+        if (!deque.isEmpty()) {
+            ip = deque.getFirst();
             editText.setText(ip);
             editText.setSelection(editText.getText().length());
+        }
+
+        //TODO: корректное отображение списка. в edittext по нажатию. тесты
+
+        LinearLayout layout = (LinearLayout) findViewById(R.id.linearLayout);
+
+        while (!deque.isEmpty()) {
+            TextView tv = new TextView(this);
+            tv.setText(deque.pop());
+            layout.addView(tv);
         }
 
         filters[0] = new InputFilter() {
@@ -75,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this);
         quitDialog.setTitle("Выход: Вы уверены?");
 
-        quitDialog.setPositiveButton("Таки да!", new DialogInterface.OnClickListener() {
+        quitDialog.setPositiveButton("Да!", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 finish();
@@ -119,6 +139,13 @@ public class MainActivity extends AppCompatActivity {
         openQuitDialog();
     }
 
+    public void setDeque() {
+        for (int i = 4; i >= 0; i--) {
+            if (!pref.getString("ip_" + i, "").isEmpty())
+                deque.addFirst(pref.getString("ip_" + i, ""));
+        }
+    }
+
 
     class useSmart extends AsyncTask<Void, Void, Boolean> {
 
@@ -135,10 +162,25 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean result) {
             PD.hideDialog();
             if (result) {
+                setDeque();
+                if (deque.contains(ip)) {
+                    deque.removeLastOccurrence(ip);
+                }
+                deque.addFirst(ip);
+                if (deque.size() > 5) {
+                    deque.removeLast();
+                }
+
                 SharedPreferences.Editor editPref = pref.edit();
-                editPref.putString("last_ip", ip);
+                for (int i = 0; i < deque.size(); i++) {
+                    editPref.putString("ip_" + i, deque.peekFirst());
+                    //editPref.commit();
+                }
+                deque.clear();
                 editPref.commit();
-                Intent intent = new Intent(MainActivity.this, WordActivity.class);
+                Intent intent = new Intent(MainActivity.this, WordActivity.class).addFlags(
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK).addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             } else {
                 PD.showToast(MainActivity.this, "Error! Check your connecting!");

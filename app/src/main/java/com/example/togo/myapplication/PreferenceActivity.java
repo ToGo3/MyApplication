@@ -161,7 +161,7 @@ public class PreferenceActivity extends AppCompatActivity {
                 PreferenceActivity.this);
         quitDialog.setTitle("Вы хотите сохранить изменения?");
 
-        quitDialog.setNegativeButton("Таки да!", new DialogInterface.OnClickListener() {
+        quitDialog.setNegativeButton("Да!", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 accept.performClick();

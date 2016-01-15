@@ -1,5 +1,7 @@
 package com.example.togo.myapplication;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -56,6 +58,31 @@ public class WordActivity extends AppCompatActivity {
     public void options(View view) {
         Intent intent = new Intent(WordActivity.this, PreferenceActivity.class);
         startActivity(intent);
+    }
+
+    private void openQuitDialog() {
+        AlertDialog.Builder quitDialog = new AlertDialog.Builder(
+                WordActivity.this);
+        quitDialog.setTitle("Выход: Вы уверены?");
+
+        quitDialog.setPositiveButton("Да!", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+
+        quitDialog.setNegativeButton("Нет", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        quitDialog.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        openQuitDialog();
     }
 
     class useSmart extends AsyncTask<Vector<SmartSpaceTriplet>, Void, Boolean> {

@@ -17,6 +17,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="left"
+        android:allowUndo="false"
+        android:linksClickable="false"
+        android:singleLine="false"
         android:text="Insert SmartM3 IP"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -52,4 +55,8 @@
 
     </RelativeLayout>
 
+    <ListView
+        android:id="@+id/lvMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></ListView>
 </LinearLayout>

@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -14,11 +13,8 @@ import android.text.InputFilter;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
-
-import java.util.Deque;
-import java.util.LinkedList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,8 +22,6 @@ public class MainActivity extends AppCompatActivity {
     private InputFilter[] filters = new InputFilter[1];
     private TextView textView;
     private EditText editText;
-    private SharedPreferences pref;
-    private Deque<String> deque;
 
 
     @Override
@@ -36,27 +30,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         textView = (TextView) findViewById(R.id.textView);
         editText = (EditText) findViewById(R.id.ip_address);
-        pref = getSharedPreferences("main", MODE_PRIVATE);
+        final ListView lvMain = (ListView) findViewById(R.id.lvMain);
 
+        ListOfLastUse.showList(ListOfLastUse.getList(this, "ip_"), lvMain, editText);
 
-        deque = new LinkedList<String>();
-        setDeque();
-
-        if (!deque.isEmpty()) {
-            ip = deque.getFirst();
-            editText.setText(ip);
-            editText.setSelection(editText.getText().length());
-        }
-
-        //TODO: корректное отображение списка. в edittext по нажатию. тесты
-
-        LinearLayout layout = (LinearLayout) findViewById(R.id.linearLayout);
-
-        while (!deque.isEmpty()) {
-            TextView tv = new TextView(this);
-            tv.setText(deque.pop());
-            layout.addView(tv);
-        }
+        //TODO:тесты
 
         filters[0] = new InputFilter() {
             @Override
@@ -139,19 +117,12 @@ public class MainActivity extends AppCompatActivity {
         openQuitDialog();
     }
 
-    public void setDeque() {
-        for (int i = 4; i >= 0; i--) {
-            if (!pref.getString("ip_" + i, "").isEmpty())
-                deque.addFirst(pref.getString("ip_" + i, ""));
-        }
-    }
-
 
     class useSmart extends AsyncTask<Void, Void, Boolean> {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            return SmartM3.insert(null, MainActivity.this);
+            return true;//SmartM3.insert(null, MainActivity.this);
         }
 
         protected void onPreExecute() {
@@ -162,22 +133,9 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean result) {
             PD.hideDialog();
             if (result) {
-                setDeque();
-                if (deque.contains(ip)) {
-                    deque.removeLastOccurrence(ip);
-                }
-                deque.addFirst(ip);
-                if (deque.size() > 5) {
-                    deque.removeLast();
-                }
 
-                SharedPreferences.Editor editPref = pref.edit();
-                for (int i = 0; i < deque.size(); i++) {
-                    editPref.putString("ip_" + i, deque.peekFirst());
-                    //editPref.commit();
-                }
-                deque.clear();
-                editPref.commit();
+                ListOfLastUse.setList("ip_", ip);
+
                 Intent intent = new Intent(MainActivity.this, WordActivity.class).addFlags(
                         Intent.FLAG_ACTIVITY_CLEAR_TASK).addFlags(
                         Intent.FLAG_ACTIVITY_NEW_TASK);

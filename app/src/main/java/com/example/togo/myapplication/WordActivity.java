@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ListView;
 
 import java.util.Vector;
 
@@ -16,7 +17,6 @@ import wrapper.SmartSpaceTriplet;
 
 public class WordActivity extends AppCompatActivity {
     private EditText editText;
-    private SharedPreferences pref;
     private SharedPreferences lettersPref;
 
     @Override
@@ -24,13 +24,13 @@ public class WordActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_word);
         editText=(EditText)findViewById(R.id.editText);
-        pref = getSharedPreferences("main", MODE_PRIVATE);
         lettersPref = getSharedPreferences("letters", MODE_PRIVATE);
-        String word = pref.getString("last_word", "");
-        if (!word.equals("")) {
-            editText.setText(word);
-            editText.setSelection(editText.getText().length());
-        }
+
+        ListOfLastUse.showList(ListOfLastUse.getList(this, "word_"), (ListView) findViewById(R.id.lvWord), editText);
+
+
+        //TODO:тесты
+
     }
 
 
@@ -101,9 +101,9 @@ public class WordActivity extends AppCompatActivity {
             PD.hideDialog();
             if (result) {
                 PD.showToast(WordActivity.this, "Data was correctly inserted");
-                SharedPreferences.Editor editPref = pref.edit();
-                editPref.putString("last_word", editText.getText().toString());
-                editPref.commit();
+
+                ListOfLastUse.setList("word_", editText.getText().toString());
+                ListOfLastUse.showList(ListOfLastUse.getList(WordActivity.this, "word_"), (ListView) findViewById(R.id.lvWord), editText);
             } else {
                 PD.showToast(WordActivity.this, "Error! Check your connecting");
             }

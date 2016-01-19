@@ -36,17 +36,12 @@ public class SmartM3 {
                 } else
                     smartSpaceKPI.remove(new SmartSpaceTriplet(null, triples.elementAt(0).getPredicate(), null));
             }
-            Vector<SmartSpaceTriplet> query = smartSpaceKPI.query(new SmartSpaceTriplet("Word", "is", null));
-            SharedPreferences pref = context.getSharedPreferences("main", context.MODE_PRIVATE);
+
+            //обновляем настройки данными из SS
+            Vector<SmartSpaceTriplet> query = smartSpaceKPI.query(new SmartSpaceTriplet(null, "hasColor", null));
+            ;
+            SharedPreferences pref = context.getSharedPreferences("letters", context.MODE_PRIVATE);
             SharedPreferences.Editor editPref = pref.edit();
-            editPref.clear();
-            if (!query.isEmpty()) {
-                editPref.putString("last_word", query.lastElement().getObject());
-            }
-            editPref.commit();
-            query = smartSpaceKPI.query(new SmartSpaceTriplet(null, "hasColor", null));
-            pref = context.getSharedPreferences("letters", context.MODE_PRIVATE);
-            editPref = pref.edit();
             editPref.clear();
             if (!query.isEmpty()) {
                 for (int i = 0; i < query.size(); i++) {

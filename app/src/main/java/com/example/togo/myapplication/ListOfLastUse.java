@@ -66,9 +66,7 @@ public class ListOfLastUse {
         int dequeSize = deque.size();
         for (int i = 0; i < dequeSize; i++) {
             editPref.putString(key + i, deque.pop());
-            //editPref.commit();
         }
-        //deque.clear();
 
         editPref.commit();
     }
